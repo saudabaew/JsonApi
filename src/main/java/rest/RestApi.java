@@ -1,6 +1,8 @@
 package rest;
 
+import rest.dto.UserOfDB;
 import rest.request.SensorOfPeriodInner;
+import rest.request.User;
 import rest.response.SensorOfPeriodList;
 import rest.dto.SensorOfPeriod;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,7 +12,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.web.bind.annotation.*;
+import rest.util.DataSourceUtil;
 
+import javax.annotation.PostConstruct;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
@@ -20,7 +24,15 @@ import java.util.List;
 public class RestApi {
 
     @Autowired
-    private JdbcTemplate jdbcTemplateAgrotronic;
+    DataSourceUtil dataSourceUtil;
+
+    private JdbcTemplate jdbcTemplateSakura, jdbcTemplateAgrotronic;
+
+    @PostConstruct
+    public void init()  throws SQLException {
+        jdbcTemplateAgrotronic = new JdbcTemplate(dataSourceUtil.getDataSourceAgrotronic());
+        jdbcTemplateSakura = new JdbcTemplate(dataSourceUtil.getDataSourceSakura());
+    }
 
     @RequestMapping(value = "/idunit/idsensor", method = RequestMethod.POST, consumes = "application/json", produces = "application/json")
     private HttpEntity<SensorOfPeriodList> sensorValueOfPeriod(@RequestBody SensorOfPeriodInner sensorOfPeriodInner){
